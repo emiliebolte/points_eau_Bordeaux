@@ -45,13 +45,15 @@ st.sidebar.markdown("---")
 st.sidebar.subheader("🎯 Trouver le plus proche")
 besoin = st.sidebar.radio(
     "Quel est votre besoin ?",
-    options=["💧 Fontaine (Boire)", "🌫️ Brumisateur (Se rafraîchir)", "🌟 N'importe quel point"]
+    options=["🚻 Toilettes", "💧 Fontaine (Boire)", "🌫️ Brumisateur (Se rafraîchir)", "🌟 N'importe quel point"]
 )
 
 if "Fontaine" in besoin:
     df_cible = df[df["categorie"] == "Fontaine"].copy()
 elif "Brumisateur" in besoin:
     df_cible = df[df["categorie"] == "Brumisateur"].copy()
+elif "Toilettes" in besoin:
+    df_cible = df[df["categorie"] == "Toilettes"].copy()
 else:
     df_cible = df.copy()
 
@@ -76,18 +78,23 @@ if loc and isinstance(loc, dict) and "coords" in loc:
 else:
     st.sidebar.info("En attente de l'autorisation GPS du navigateur...")
     
-        
-   
-    
     
 # 5. Interactive map
 m = folium.Map(location=[44.837789, -0.57918], zoom_start=13)
 
+CONFIG_POINTS = {
+    "Fontaine": {"icon": "tint", "color": "blue", "prefix": "fa"},
+    "Brumisateur": {"icon": "cloud", "color": "green", "prefix": "fa"},
+    "Toilettes": {"icon": "restroom", "color": "purple", "prefix": "fa"}
+}
+
 for _, r in df_filtre.iterrows():
-    is_brumi = r["categorie"] == "Brumisateur"
+    cfg = CONFIG_POINTS.get(r["categorie"], {"icon": "info-sign", "color": "gray", "prefix": "glyphicon"})
+    
     icon = folium.Icon(
-        icon="cloud" if is_brumi else "tint",
-        color="green" if is_brumi else "blue",
+        icon=cfg["icon"],
+        color=cfg["color"],
+        prefix=cfg["prefix"],
         icon_color="white"
     )
     folium.Marker(
@@ -96,13 +103,6 @@ for _, r in df_filtre.iterrows():
         tooltip=str(r["nom"]),
         popup=f"<b>{r['nom']}</b><br>Type: {r['type']}<br>État: {r['etat']}"
     ).add_to(m)
-
-LocateControl(
-    auto_start=False,
-    position="topleft",
-    icon="fa fa-crosshairs",
-    strings={"title": "Me localiser"}
-).add_to(m)
 
 # Show the closest point
 if plus_proche is not None:
