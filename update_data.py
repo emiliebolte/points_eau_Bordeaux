@@ -51,7 +51,24 @@ for gid in range(1, 60):
             })
 
 df_brumi = pd.DataFrame(brumisateurs)
+#3 Data recovery : toilets
+url_toilettes = "https://opendata.bordeaux-metropole.fr/api/explore/v2.1/catalog/datasets/bor_sigsanitaire/records"
+res_toilettes = requests.get(url_toilettes, params={"limit": 100}).json()
+records_toilettes = res_toilettes.get("results", [])
+
+df_toilettes_raw = pd.json_normalize(records_toilettes)
+
+df_toilettes = pd.DataFrame({
+    "id": df_toilettes_raw["gid"],
+    "nom": df_toilettes_raw["adresse"],
+    "type": df_toilettes_raw["type"],
+    "etat": "en_service",
+    "commune": "Bordeaux",
+    "lon": df_toilettes_raw["geo_point_2d.lon"],
+    "lat": df_toilettes_raw["geo_point_2d.lat"],
+    "categorie": "Toilettes"
+})
 
 # 3. Concatenate & save
-df_final = pd.concat([df_brumi, df_fontaines], ignore_index=True)
+df_final = pd.concat([df_brumi, df_fontaines, df_toilettes], ignore_index=True)
 df_final.to_csv("points_fraicheur_bordeaux_clean.csv", index=False)
