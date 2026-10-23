@@ -8,7 +8,7 @@ import pandas as pd
 
 
 st.set_page_config(page_title="Fraîcheur Bordeaux", layout="wide")
-st.title("Points d'eau et brumisateurs — Bordeaux Métropole")
+st.title("WC, fontaines et brumisateurs — Bordeaux Métropole")
 
 # 1. Load & clean datas
 @st.cache_data
